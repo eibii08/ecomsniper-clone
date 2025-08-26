@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>EcomSniper Clone</title>
+</head>
+<body>
+  <h1>EcomSniper Clone</h1>
+  <button id="checkPolicies">Payment Policies prüfen</button>
+  <pre id="output"></pre>
+
+  <script>
+    document.getElementById("checkPolicies").addEventListener("click", async () => {
+      try {
+        const response = await fetch("http://localhost:3000/payment-policies");
+        const data = await response.json();
+        document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("output").textContent = err.message;
+      }
+    });
+  </script>
+</body>
+</html>

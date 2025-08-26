@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "EcomSniper Clone",
+  "version": "1.0",
+  "description": "Listet Amazon-Produkte auf eBay",
+  "permissions": ["activeTab", "storage"],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
