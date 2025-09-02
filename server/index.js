@@ -34,7 +34,7 @@ app.use(
 // Statische Dateien aus dem Extension-Ordner
 app.use(express.static(path.join(__dirname, "../extension")));
 
-// Healthcheck
+// Healthcheck Endpoint
 app.get("/health", (_req, res) => res.json({ ok: true, time: new Date().toISOString() }));
 
 // Homepage → popup.html ausliefern
@@ -73,6 +73,21 @@ app.get("/payment-policies", async (_req, res) => {
   } catch (err) {
     console.error("Fehler /payment-policies:", err);
     res.status(500).json({ error: err.message || "Unbekannter Fehler" });
+  }
+});
+
+// Weitere eBay Endpoints vorbereiten (optional)
+// z.B. Versand-Policies
+app.get("/shipping-policies", async (_req, res) => {
+  try {
+    const url = "https://api.ebay.com/sell/account/v1/shipping_policy";
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${EBAY_TOKEN}`, "Content-Type": "application/json" },
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
