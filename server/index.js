@@ -49,16 +49,18 @@ app.get("/", (_req, res) => {
 // -------------------- OAUTH FLOW --------------------
 // 1. Redirect to eBay login
 app.get("/auth", (_req, res) => {
+  const clientId = process.env.EBAY_CLIENT_ID;
+  const redirectUri = "Tobias_Eibl-TobiasEi-app-PR-vzfvzbzki"; // Dein RuName
   const scopes = [
+    "https://api.ebay.com/oauth/api_scope",
     "https://api.ebay.com/oauth/api_scope/sell.account",
-    "https://api.ebay.com/oauth/api_scope/sell.inventory",
-    "https://api.ebay.com/oauth/api_scope/sell.marketing",
-    "https://api.ebay.com/oauth/api_scope/sell.fulfillment"
-  ].join(" ");
+    "https://api.ebay.com/oauth/api_scope/sell.inventory"
+  ].join(" "); // Leerzeichen-getrennt
 
-  const url = `https://auth.ebay.com/oauth2/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(scopes)}`;
-  res.redirect(url);
+  const authUrl = `https://auth.ebay.com/oauth2/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${encodeURIComponent(scopes)}`;
+  res.redirect(authUrl);
 });
+
 
 // 2. Callback, exchange code for access_token
 app.get("/callback", async (req, res) => {
