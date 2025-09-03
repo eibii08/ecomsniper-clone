@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>EcomSniper Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>EcomSniper Dashboard</h1>
+  </header>
+  <main>
+    <p>Status: <span id="status">Lade...</span></p>
+    <button id="authBtn">Mit eBay verbinden</button>
+    <section id="productSection">
+      <h2>Produkt</h2>
+      <div id="product"></div>
+      <label>Preis (EUR): <input type="number" id="priceInput" /></label>
+      <label>Menge: <input type="number" id="qtyInput" value="1" /></label>
+      <label>Zahlung:
+        <select id="paymentSelect"></select>
+      </label>
+      <label>Return:
+        <select id="returnSelect"></select>
+      </label>
+      <label>Fulfillment:
+        <select id="fulfillmentSelect"></select>
+      </label>
+      <label>Merchant Location:
+        <select id="locationSelect"></select>
+      </label>
+      <button id="listBtn">Zu eBay listen</button>
+      <pre id="result"></pre>
+    </section>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
