@@ -1,44 +1,13 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>EcomSniper — MVP</title>
-  <style>
-    body { font-family: Inter, system-ui, Arial; width:360px; padding:12px; background:#f6f7fb; color:#111;}
-    h2 { margin:0 0 8px 0; font-size:18px;}
-    .card { background:#fff; border-radius:8px; padding:12px; box-shadow:0 4px 10px rgba(12,20,40,0.06); margin-bottom:10px;}
-    button { background:#0b5fff;color:white;border:0;padding:8px 12px;border-radius:6px;cursor:pointer;}
-    input, select, textarea { width:100%; padding:8px; border-radius:6px; border:1px solid #ddd; margin-top:6px; box-sizing:border-box;}
-    .muted { color:#666; font-size:13px;}
-    .row { display:flex; gap:8px; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h2>EcomSniper — Quick List</h2>
-    <div id="status" class="muted">Lade Produktdaten…</div>
-    <div id="product" style="margin-top:8px;"></div>
-  </div>
-
-  <div class="card">
-    <label>Preisvorschlag (EUR)</label>
-    <input id="priceInput" type="text" />
-    <label>Menge</label>
-    <input id="qtyInput" type="number" value="1" min="1" />
-    <label>Wähle Policies</label>
-    <select id="paymentSelect"></select>
-    <select id="fulfillmentSelect" style="margin-top:6px"></select>
-    <select id="returnSelect" style="margin-top:6px"></select>
-    <label>Merchant Location (für Publish)</label>
-    <select id="locationSelect" style="margin-top:6px"></select>
-    <div style="margin-top:8px; display:flex; gap:8px;">
-      <button id="listBtn">Zu eBay listen</button>
-      <button id="authBtn" style="background:#3b82f6">Mit eBay verbinden</button>
-    </div>
-    <div id="result" style="margin-top:8px"></div>
-  </div>
-
-  <script src="popup.js"></script>
-</body>
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EcomSniper</title>
+    <link href="dist/output.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="dist/bundle.js"></script>
+  </body>
 </html>

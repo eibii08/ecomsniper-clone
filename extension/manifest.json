@@ -1,28 +1,18 @@
 {
   "manifest_version": 3,
-  "name": "EcomSniper Clone - MVP",
+  "name": "EcomSniper Clone",
+  "description": "Schnelles Listing von Amazon-Produkten auf eBay",
   "version": "1.0.0",
-  "description": "Scrape Amazon product and list to eBay via your server",
-  "permissions": ["activeTab", "scripting", "storage"],
-  "host_permissions": [
-    "https://*.amazon.com/*",
-    "https://*.amazon.de/*",
-    "https://*.amazon.*",
-    "https://ecomsniper-clone.onrender.com/*",
-    "https://meine-app.eu/*"
-  ],
-  "background": {
-    "service_worker": "background.js"
-  },
+  "permissions": ["storage", "activeTab", "scripting"],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "EcomSniper"
+    "default_icon": "icons/icon-128.png"
   },
   "content_scripts": [
     {
-      "matches": ["https://*.amazon.com/*", "https://*.amazon.de/*", "https://*.amazon.*"],
+      "matches": ["*://www.amazon.de/*", "*://www.amazon.com/*"],
       "js": ["content_script.js"],
-      "run_at": "document_idle"
+      "run_at": "document_end"
     }
   ]
 }

@@ -1,5 +1,4 @@
-// popup.js
-const serverBase = "https://ecomsniper-clone.onrender.com"; // <--- passe an falls nötig
+const serverBase = "https://ecomsniper-clone.onrender.com"; // <--- anpassen falls nötig
 
 document.addEventListener("DOMContentLoaded", async () => {
   const status = document.getElementById("status");
@@ -14,21 +13,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   const listBtn = document.getElementById("listBtn");
   const authBtn = document.getElementById("authBtn");
 
-  // get product from active tab
+  // Produkt vom aktiven Tab holen
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
   const tab = tabs[0];
   chrome.tabs.sendMessage(tab.id, { type: "GET_PRODUCT" }, (resp) => {
     if (resp && resp.product) {
       status.textContent = "Produkt gefunden";
       const p = resp.product;
-      productDiv.innerHTML = `<strong>${escapeHtml(p.title)}</strong><div class="muted">ASIN: ${escapeHtml(p.asin || "-")}</div><div style="margin-top:6px">${p.images && p.images[0] ? `<img src="${p.images[0]}" style="max-width:100%;border-radius:6px"/>` : ""}</div>`;
+      productDiv.innerHTML = `
+        <strong>${escapeHtml(p.title)}</strong>
+        <div class="muted">ASIN: ${escapeHtml(p.asin || "-")}</div>
+        <div style="margin-top:6px">
+          ${p.images && p.images[0] ? `<img src="${p.images[0]}" style="max-width:100%;border-radius:6px"/>` : ""}
+        </div>
+      `;
       priceInput.value = p.price || "";
     } else {
       status.textContent = "Kein Produkt auf dieser Seite gefunden.";
     }
   });
 
-  // fetch policies and locations
+  // Policies laden
   async function loadPolicies() {
     try {
       const r = await fetch(`${serverBase}/api/ebay/policies`);
@@ -36,15 +41,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       const data = await r.json();
 
       paymentSelect.innerHTML = `<option value="">-- Zahlungs-Policy (optional) --</option>`;
-      (data.payment && data.payment.paymentPolicies || []).forEach(p => {
+      (data.payment?.paymentPolicies || []).forEach(p => {
         const opt = document.createElement("option");
         opt.value = p.paymentPolicyId;
-        opt.textContent = p.name || `${p.paymentPolicyId}`;
+        opt.textContent = p.name || p.paymentPolicyId;
         paymentSelect.appendChild(opt);
       });
 
       fulfillmentSelect.innerHTML = `<option value="">-- Fulfillment (Versand) --</option>`;
-      (data.fulfillment && data.fulfillment.fulfillmentPolicies || []).forEach(p => {
+      (data.fulfillment?.fulfillmentPolicies || []).forEach(p => {
         const opt = document.createElement("option");
         opt.value = p.fulfillmentPolicyId;
         opt.textContent = p.name || p.fulfillmentPolicyId;
@@ -52,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       returnSelect.innerHTML = `<option value="">-- Return (Rückgabe) --</option>`;
-      (data.returns && data.returns.returnPolicies || []).forEach(p => {
+      (data.returns?.returnPolicies || []).forEach(p => {
         const opt = document.createElement("option");
         opt.value = p.returnPolicyId;
         opt.textContent = p.name || p.returnPolicyId;
@@ -63,6 +68,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // Locations laden
   async function loadLocations() {
     try {
       const r = await fetch(`${serverBase}/api/ebay/locations`);
@@ -82,19 +88,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadPolicies();
   await loadLocations();
 
+  // OAuth Button
   authBtn.addEventListener("click", async () => {
-    // open /auth in new tab via background
     const authUrl = `${serverBase}/auth`;
     chrome.runtime.sendMessage({ type: "OPEN_AUTH", url: authUrl });
   });
 
+  // Listing Button
   listBtn.addEventListener("click", async () => {
     resultDiv.textContent = "Listing läuft...";
+    handleListOnEbay();
+  });
+
+  // Listing-Funktion
+  async function handleListOnEbay() {
     try {
       const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
       const tab = tabs[0];
       chrome.tabs.sendMessage(tab.id, { type: "GET_PRODUCT" }, async (resp) => {
-        const product = (resp && resp.product) || {};
+        const product = resp?.product || {};
         const payload = {
           sku: `SNIP-${Date.now()}`,
           title: product.title || "No title",
@@ -103,7 +115,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           currency: "EUR",
           quantity: Number(qtyInput.value || 1),
           images: product.images || [],
-          categoryId: null, // you can add here a category ID if you have it
+          categoryId: null,
           merchantLocationKey: locationSelect.value || undefined,
           paymentPolicyId: paymentSelect.value || undefined,
           returnPolicyId: returnSelect.value || undefined,
@@ -116,12 +128,19 @@ document.addEventListener("DOMContentLoaded", async () => {
           body: JSON.stringify(payload),
         });
         const json = await r.json();
-        resultDiv.textContent = JSON.stringify(json, null, 2);
+
+        if (json.ok) {
+          resultDiv.textContent = `✅ Produkt erfolgreich gelistet! OfferID: ${json.offerId}`;
+        } else {
+          resultDiv.textContent = `❌ Fehler: ${JSON.stringify(json, null, 2)}`;
+        }
       });
     } catch (err) {
       resultDiv.textContent = "Fehler: " + err.message;
     }
-  });
+  }
 
-  function escapeHtml(s) { return (s||"").replace(/[&<>"']/g, (m)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
+  function escapeHtml(s) {
+    return (s||"").replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[m]);
+  }
 });

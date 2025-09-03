@@ -1,54 +1,37 @@
-// content_script.js
+// Läuft automatisch auf Amazon-Produktseiten
 (function () {
-  function getText(selectors) {
-    for (const s of selectors) {
-      const el = document.querySelector(s);
-      if (el) {
-        return el.textContent.trim();
-      }
+  const sendProductData = () => {
+    try {
+      const title = document.querySelector("#productTitle")?.innerText.trim() || "";
+      const price = document.querySelector(
+        ".a-price .a-offscreen"
+      )?.innerText.replace("€", "").trim() || "";
+      const images = Array.from(document.querySelectorAll("#altImages img")).map(img =>
+        img.src.replace(/\.(_.*_)\./, ".")
+      );
+      const asin = document.querySelector("#ASIN")?.value || "";
+      const quantityAvailable = parseInt(
+        document.querySelector("#availability .a-declarative span")?.innerText.match(/\d+/)?.[0] || "0"
+      );
+
+      const productData = {
+        title,
+        price,
+        images,
+        asin,
+        quantityAvailable,
+        url: window.location.href,
+      };
+
+      // Sende die Daten an das Popup
+      chrome.runtime.sendMessage({ type: "AMAZON_PRODUCT", payload: productData });
+    } catch (err) {
+      console.error("Fehler beim Auslesen des Amazon-Produkts:", err);
     }
-    return "";
-  }
-
-  const title = getText(["#productTitle", "#title", ".product-title-word-break"]) || document.title;
-  let priceRaw = getText(["#priceblock_ourprice", "#priceblock_dealprice", ".a-price .a-offscreen"]);
-  if (!priceRaw) {
-    const priceEl = document.querySelector(".priceBlockBuyingPriceString, .offer-price");
-    if (priceEl) priceRaw = priceEl.textContent;
-  }
-  let price = priceRaw ? priceRaw.replace(/[^\d,.\-]/g, "").replace(",", ".") : null;
-  const asinInput = document.querySelector("#ASIN") || document.querySelector('input[name="ASIN"]');
-  const asin = asinInput ? asinInput.value || asinInput.getAttribute("value") : null;
-
-  const images = [];
-  const main = document.querySelector("#imgTagWrapperId img") || document.querySelector("#landingImage");
-  if (main) {
-    images.push(main.src || main.getAttribute("data-old-hires"));
-  }
-  document.querySelectorAll("#altImages img, .imageThumbnail img, .a-dynamic-image").forEach((img) => {
-    if (img.src) images.push(img.src);
-  });
-
-  const description =
-    getText(["#productDescription", "#bookDescription_feature_div", "#productOverview_feature_div"]) ||
-    getText(["#feature-bullets", ".feature-bullets"]);
-
-  const product = {
-    title,
-    price,
-    asin,
-    images: Array.from(new Set(images)).filter(Boolean),
-    description,
-    url: location.href,
   };
 
-  // keep a quick reference
-  window.__ECOM_SNIPER_PRODUCT = product;
-
-  // answer to popup requests
-  chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-    if (msg && msg.type === "GET_PRODUCT") {
-      sendResponse({ ok: true, product });
-    }
+  // Warte, bis die Seite geladen ist
+  window.addEventListener("load", () => {
+    setTimeout(sendProductData, 1000); // kleine Verzögerung für alle Elemente
   });
 })();
